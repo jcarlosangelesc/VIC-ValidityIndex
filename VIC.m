@@ -3,4 +3,7 @@ clear all
 clc
 
 classifiers = ["LDA", "DecisionTree", "RandomForest", "KNN"];
-evaluateClassifiers(classifiers, 10, 50)
+kFolds = 10;
+partitions = 50;
+
+evaluateClassifiers(classifiers, kFolds, partitions);

@@ -18,7 +18,7 @@ else
 
     % Separate feature columns from partition columns
     features = data(:, 1:end-nPartitions);
-    features = fillmissing(features, 'nearest');
+    %features = fillmissing(features, 'nearest');
     partitions = table2cell(data(:, end-nPartitions+1:end));
 
     % Loop through each partition and calculate AUCs for all the specified
@@ -42,22 +42,27 @@ else
                 % Train and test split for the current fold
                 trainIdx = folds.training(k);
                 testIdx = folds.test(k);
+                
+                trainX = fillmissing(features(trainIdx, :), 'nearest');
+                trainY = partition(trainIdx, :);
+                testX = fillmissing(features(testIdx, :), 'nearest');
+                testY = partition(testIdx, :);
                 valid = true;
 
                 % Here are all the available classifiers. You may change
                 % their parameters according to your needs.
                 if strcmp(classifiers(c), 'RandomForest')
-                    classifier = TreeBagger(100, features(trainIdx, :), partition(trainIdx, :), 'Method', 'classification');
+                    classifier = TreeBagger(100, trainX, trainY, 'Method', 'classification');
                 elseif strcmp(classifiers(c), 'KNN')
-                    classifier = fitcknn(features(trainIdx, :), partition(trainIdx, :),'NumNeighbors',5,'Standardize',1);
+                    classifier = fitcknn(trainX, trainY,'NumNeighbors',5,'Standardize',1);
                 elseif strcmp(classifiers(c), 'DecisionTree')
-                    classifier = fitctree(features(trainIdx, :), partition(trainIdx, :));
+                    classifier = fitctree(trainX, trainY);
                 elseif strcmp(classifiers(c), 'LDA')
-                    classifier = fitcdiscr(features(trainIdx, :), partition(trainIdx, :), 'discrimType', 'pseudoLinear');
+                    classifier = fitcdiscr(trainX, trainY, 'discrimType', 'pseudoLinear');
                 elseif strcmp(classifiers(c), 'NaiveBayes')
-                    classifier = fitcnb(features(trainIdx, :), partition(trainIdx, :));
+                    classifier = fitcnb(trainX, trainY);
                 elseif strcmp(classifiers(c), 'SVM')
-                    classifier = fitcecoc(features(trainIdx, :), partition(trainIdx, :));
+                    classifier = fitcecoc(trainX, trainY);
                 else
                     disp('Unknown classifier')
                     continue
@@ -66,8 +71,8 @@ else
                 if valid
                     % Train the classifier and calculate the ROC AUC for
                     % this fold and store the result.
-                    [Yfit,scores,stdevs] = classifier.predict(features(testIdx, :));
-                    [X,Y,T,AUC] = perfcurve(partition(testIdx, :),scores(:,1),'+');
+                    [Yfit,scores,stdevs] = classifier.predict(testX);
+                    [X,Y,T,AUC] = perfcurve(testY,scores(:,1),'+');
                     AUCs(k) = AUC;
                     disp(sprintf('Cross Validation: %d AUC: %3.2f Time: %3.4f', k, AUC, toc-foldTime));
                 end
