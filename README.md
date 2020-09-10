@@ -1,7 +1,7 @@
 # VIC-ValidityIndex
 VIC [1] is a Cluster Validation technique that uses a set of supervised classifiers to select which clustering algorithm to apply for a given problem.
 
-This implementation was developed in MATLAB, and uses a custom dataset of human fingerprints represented as minutiae for fingerprint recognition. For more information on the data set, please check `THE REPORT HERE.pdf`.
+This implementation was developed in MATLAB, and uses a custom dataset of human fingerprints represented as minutiae for fingerprint recognition. For more information on the data set, please check `Assignment 2.pdf`.
 
 VIC uses k-folds cross validation to train the ensemble of supervised classifiers on each partition of the dataset. Once the classifiers are trained, the mean ROC AUC of all the k-folds is used as an indicator of the validity of each classifier. In the end, the highest AUC value among all partitions indicates the most optimal partition of the data. The algorithm works as follows:
 
